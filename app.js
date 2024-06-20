@@ -37,6 +37,7 @@ const {
   authorizePermissions,
   authenticateUser,
 } = require("./middleware/authentication");
+const onConnection = require("./socket");
 
 app.set("trust proxy", 1);
 app.use(
@@ -69,9 +70,7 @@ app.use(
   userRoleRouter
 );
 
-io.on("connection", (socket) => {
-  console.log("a user connected");
-});
+io.on("connection", onConnection);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
