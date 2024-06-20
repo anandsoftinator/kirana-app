@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const {
   handleGetAllUsers,
@@ -12,7 +15,7 @@ router.route("/").get(handleGetAllUsers);
 router
   .route("/:id")
   .get(handleGetUserByID)
-  .patch(handleUpdateUserByID)
+  .patch(upload.single("image"), handleUpdateUserByID)
   .delete(handleDeleteUserByID);
 
 module.exports = router;

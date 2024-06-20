@@ -2,6 +2,7 @@ const { getSupabaseClient } = require("../db/connect");
 const validator = require("validator");
 const { StatusCodes } = require("http-status-codes");
 const { CustomAPIError } = require("../errors");
+const { storeImage } = require("../utils/fileUpload");
 
 // Initialize the Supabase client
 const supabase = getSupabaseClient();
@@ -38,6 +39,7 @@ const handleGetUserByID = async (req, res) => {
 const handleUpdateUserByID = async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
+  const imageFile = req.file;
 
   if (!id || !updateData) {
     throw new CustomAPIError("Invalid request data", StatusCodes.BAD_REQUEST);
@@ -60,6 +62,10 @@ const handleUpdateUserByID = async (req, res) => {
     return obj;
   }, {});
 
+  if (imageFile) {
+    validUpdateData.userImage = await storeImage(imageFile, "UserImages");
+  }
+
   if (Object.keys(validUpdateData).length === 0) {
     throw new CustomAPIError(
       "No valid fields to update",
@@ -67,12 +73,11 @@ const handleUpdateUserByID = async (req, res) => {
     );
   }
 
-  // Perform the update
   const { data, error } = await supabase
     .from("user")
     .update(validUpdateData)
     .eq("uuid", id)
-    .select(); // Ensure data is returned
+    .select();
 
   if (error) {
     console.error("Supabase error:", error);
