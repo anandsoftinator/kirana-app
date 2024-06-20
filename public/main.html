@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Selector</title>
+</head>
+<body>
+    <h1>Welcome to the Login Selector</h1>
+    <div>
+        <button id="userLogin">User Login</button>
+        <button id="shopLogin">Shop Login</button>
+    </div>
+
+<script>
+document.getElementById('userLogin').addEventListener('click', function() {
+    // Navigate directly to the User Login page
+    window.location.href = 'api/users/login';
+});
+
+document.getElementById('shopLogin').addEventListener('click', function() {
+    // Navigate directly to the Shop Login page
+    window.location.href = 'api/shop/login';
+});
+</script>
+
+</body>
+</html>

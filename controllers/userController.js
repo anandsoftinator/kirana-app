@@ -1,0 +1,104 @@
+const { getSupabaseClient } = require("../db/connect");
+const validator = require("validator");
+const { StatusCodes } = require("http-status-codes");
+const { CustomAPIError } = require("../errors");
+
+// Initialize the Supabase client
+const supabase = getSupabaseClient();
+
+const handleGetAllUsers = async (req, res) => {
+  const { data, error } = await supabase.from("user").select("*");
+
+  if (error) {
+    throw new CustomAPIError(`Error occured : ${error.message}`);
+  }
+
+  res.status(StatusCodes.OK).json({ message: "success", data: data });
+};
+
+const handleGetUserByID = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from("user")
+    .select("*")
+    .eq("uuid", id)
+    .single();
+
+  if (!data) {
+    throw new CustomAPIError(`No user with id : ${req.params.id}`);
+  }
+
+  if (error) {
+    throw new CustomAPIError(`Error occured : ${error.message}`);
+  }
+
+  res.status(StatusCodes.OK).json({ message: "success", data: data });
+};
+
+const handleUpdateUserByID = async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  if (!id || !updateData) {
+    throw new CustomAPIError("Invalid request data", StatusCodes.BAD_REQUEST);
+  }
+
+  const validFields = [
+    "name",
+    "phone_number",
+    "address",
+    "latitude",
+    "longitude",
+    "status",
+    "last_online_at",
+  ];
+  const updateFields = Object.keys(updateData).filter((key) =>
+    validFields.includes(key)
+  );
+  const validUpdateData = updateFields.reduce((obj, key) => {
+    obj[key] = updateData[key];
+    return obj;
+  }, {});
+
+  if (Object.keys(validUpdateData).length === 0) {
+    throw new CustomAPIError(
+      "No valid fields to update",
+      StatusCodes.BAD_REQUEST
+    );
+  }
+
+  // Perform the update
+  const { data, error } = await supabase
+    .from("user")
+    .update(validUpdateData)
+    .eq("uuid", id)
+    .select(); // Ensure data is returned
+
+  if (error) {
+    console.error("Supabase error:", error);
+    throw new CustomAPIError(
+      `Error occurred: ${error.message}`,
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+
+  res.status(StatusCodes.OK).json({ message: "success", data });
+};
+
+const handleDeleteUserByID = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase.from("user").delete().eq("uuid", id);
+
+  if (error) {
+    throw new CustomAPIError(`Error occured : ${error.message}`);
+  }
+
+  res.status(StatusCodes.OK).json({ message: "success", data, errors: false });
+};
+
+module.exports = {
+  handleGetAllUsers,
+  handleGetUserByID,
+  handleUpdateUserByID,
+  handleDeleteUserByID,
+};
