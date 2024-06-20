@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
-const CustomError = require("../errors");
+const { CustomAPIError } = require("../errors");
 const { storeImage } = require("../utils");
 const { getSupabaseClient } = require("../db/connect");
 const { v4: uuidv4 } = require("uuid");
@@ -9,7 +9,7 @@ const supabase = getSupabaseClient();
 const handleUploadOrderImage = async (req, res) => {
   const imageFile = req.file;
   if (!imageFile) {
-    throw new CustomError.CustomAPIError(`No image file provided.`);
+    throw new CustomAPIError(`No image file provided.`);
   }
   const imageUrl = await storeImage(imageFile);
   res.status(StatusCodes.CREATED).json({ message: "success", data: imageUrl });
@@ -18,7 +18,7 @@ const handleUploadOrderImage = async (req, res) => {
 const handleGetCategories = async (req, res) => {
   let { data, error } = await supabase.from("categories").select("*");
   if (error) {
-    throw new CustomError.CustomAPIError(`Error occured : ${error}`);
+    throw new CustomAPIError(`Error occured : ${error.message}`);
   }
   res.status(StatusCodes.OK).json({ message: "success", data });
 };
@@ -32,11 +32,11 @@ const handleAddCategory = async (req, res) => {
     .ilike("category", category.trim());
 
   if (selectError) {
-    throw new CustomError.CustomAPIError(`Error occured : ${selectError}`);
+    throw new CustomAPIError(`Error occured : ${selectError.message}`);
   }
 
   if (existingCategories.length > 0) {
-    throw new CustomError.CustomAPIError(`Category already exists!`);
+    throw new CustomAPIError(`Category already exists!`);
   }
 
   let { data: newCategory, error: insertError } = await supabase
@@ -44,7 +44,7 @@ const handleAddCategory = async (req, res) => {
     .insert([{ category: category.trim() }]);
 
   if (insertError) {
-    throw new CustomError.CustomAPIError(`Error occured : ${insertError}`);
+    throw new CustomAPIError(`Error occured : ${insertError.message}`);
   }
 
   res.status(StatusCodes.OK).json({ messafe: "success", data: newCategory });
@@ -53,10 +53,7 @@ const handleAddCategory = async (req, res) => {
 const handleGetAllShops = async (req, res) => {
   const { data, error } = await supabase.from("shop").select("*");
   if (error) {
-    throw new CustomError.CustomAPIError(`An error occured: ${error}`);
-  }
-  if (data.length == 0) {
-    throw new CustomError.NotFoundError(`No shop found`);
+    throw new CustomAPIError(`An error occured: ${error.message}`);
   }
   res.status(StatusCodes.OK).json({ message: "Success", data: data });
 };
@@ -70,7 +67,7 @@ const handleGetShopByID = async (req, res) => {
     .single();
 
   if (error) {
-    throw new CustomError.CustomAPIError(`An error occured: ${error}`);
+    throw new CustomAPIError(`An error occured: ${error.message}`);
   }
 
   res.status(StatusCodes.OK).json({ message: "Success", data: data });
@@ -84,7 +81,7 @@ const handleUpdateShopByID = async (req, res) => {
     .eq("uuid", id);
 
   if (error) {
-    throw new CustomError.CustomAPIError(`An error occured: ${error}`);
+    throw new CustomAPIError(`An error occured: ${error.message}`);
   }
   res.status(StatusCodes.OK).json({ message: "Success", data: data });
 };
@@ -94,13 +91,13 @@ const handleDeleteShopByID = async (req, res) => {
   const { data, error } = await supabase.from("shop").delete().eq("uuid", id);
 
   if (error) {
-    throw new CustomError.CustomAPIError(`An error occured: ${error}`);
+    throw new CustomAPIError(`An error occured: ${error.message}`);
   }
   res.status(StatusCodes.OK).json({ message: "Success", data: data });
 };
 
 const handleCreateNewShop = async (req, res) => {
-  const { name, phone_number, address, category, latitude, longitude } =
+  const { shop_name, phone_number, address, category, latitude, longitude } =
     req.body;
   const imageFile = req.file;
 
@@ -113,13 +110,13 @@ const handleCreateNewShop = async (req, res) => {
     }
     return null;
   };
-  const imageUrl = await storeImage(imageFile);
+  const imageUrl = await storeImage(imageFile, "Logo");
 
-  let userData = {
+  let shopData = {
     uuid: uuidv4(),
-    shop_name: name,
+    shop_name: shop_name,
     phone_number: phone_number,
-    newAddress: await newAddress(),
+    address: await newAddress(),
     latitude: latitude.toString(),
     longitude: longitude.toString(),
     category,
@@ -128,10 +125,10 @@ const handleCreateNewShop = async (req, res) => {
     last_online_at: new Date().toISOString(),
   };
 
-  const { data, error } = await supabase.from("shop").insert([userData]);
+  const { data, error } = await supabase.from("shop").insert([shopData]);
 
   if (error) {
-    throw new CustomError.CustomAPIError(`An error occured: ${error}`);
+    throw new CustomAPIError(`An error occured: ${error.message}`);
   }
 
   res.status(StatusCodes.OK).json({ message: "Success", data: data });
@@ -148,7 +145,7 @@ const handleFindShowByPhone = async (req, res) => {
     .single();
 
   if (error) {
-    throw new CustomError.CustomAPIError(`An error occured: ${error}`);
+    throw new CustomAPIError(`An error occured: ${error.message}`);
   }
   res.status(StatusCodes.OK).json({ message: "Success", data: data });
 };

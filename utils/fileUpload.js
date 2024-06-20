@@ -3,13 +3,18 @@ const { getSupabaseClient } = require("../db/connect");
 const CustomError = require("../errors");
 const supabase = getSupabaseClient();
 
-const storeImage = async (imageFile) => {
+const storeImage = async (imageFile, type = "Order") => {
   const uniqueFilename = `${uuidv4()}-${imageFile.originalname}`;
-  const imagePath = `Order/${uniqueFilename}`;
+
+  const validType = ["Order", "Logo"];
+
+  if (!validType.includes(type)) {
+    throw new CustomError.CustomAPIError(`Not valid type storage`);
+  }
 
   const { data, error: uploadError } = await supabase.storage
-    .from("Order")
-    .upload(imagePath, imageFile.buffer, {
+    .from(type)
+    .upload(`/${uniqueFilename}`, imageFile.buffer, {
       contentType: imageFile.mimetype,
     });
 
@@ -19,7 +24,7 @@ const storeImage = async (imageFile) => {
     );
   }
 
-  const publicUrl = `${process.env.SUPABASE_PROJECT_URL}/storage/v1/object/public/${imagePath}`;
+  const publicUrl = `${process.env.SUPABASE_PROJECT_URL}/storage/v1/object/public/${type}/${uniqueFilename}`;
   return publicUrl;
 };
 
