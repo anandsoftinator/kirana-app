@@ -70,7 +70,7 @@ app.use(
   userRoleRouter
 );
 
-io.on("connection", onConnection);
+io.on("connection", onConnection(io));
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

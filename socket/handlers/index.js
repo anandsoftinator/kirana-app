@@ -1,7 +1,7 @@
-const logoutHandlerJs = require("./logoutHandler.js/index.js");
+const messageHandler = require("./messageHandler.js/index.js");
 const registerHandler = require("./registerHandler.js");
 
 module.exports = {
   registerHandler,
-  logoutHandlerJs,
+  messageHandler,
 };
