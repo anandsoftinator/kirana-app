@@ -8,9 +8,7 @@ module.exports = (io, socket) => {
         userSockets.set(uuid, []);
       }
       userSockets.get(uuid).push(socket.id);
-      console.log("userSockets", userSockets.keys(), userSockets.values());
       const users = getAllUsers();
-
       io.emit("active-users", { users });
     } catch (error) {
       console.error("Error: activate-user", error.message);
