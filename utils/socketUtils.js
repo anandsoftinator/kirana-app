@@ -9,7 +9,7 @@ const getSocketIds = async (receiverUUID) => {
 };
 
 const getAllUsers = () => {
-  return new Set(Array.from(userSockets.keys()));
+  return Array.from(userSockets.keys());
 };
 
 const removeUser = (val) => {
