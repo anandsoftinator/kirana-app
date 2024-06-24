@@ -6,7 +6,9 @@ const supabase = getSupabaseClient();
 const storeImage = async (imageFile, type = "Order") => {
   const uniqueFilename = `${uuidv4()}-${imageFile.originalname}`;
 
-  const validType = ["Order", "Logo", "UserImages"];
+  console.log("uri", uniqueFilename, imageFile.originalname);
+
+  const validType = ["Order", "Logo", "UserImages", "Post"];
 
   if (!validType.includes(type)) {
     throw new CustomError.CustomAPIError(`Not valid type storage`);

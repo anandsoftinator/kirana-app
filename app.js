@@ -25,6 +25,7 @@ const authRouter = require("./routes/authRoutes");
 const userRoleRouter = require("./routes/userRoleRouter");
 const userRouter = require("./routes/userRoutes");
 const shopRouter = require("./routes/shopRoutes");
+const postRouter = require("./routes/postRoutes");
 
 // middleware
 const notFoundMiddleware = require("./middleware/not-found");
@@ -54,8 +55,9 @@ app.use(
   [authenticateUser, authorizePermissions("admin")],
   userRouter
 );
-app.use("/api/v1/shop", shopRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/shop", shopRouter);
+app.use("/api/v1/post", postRouter);
 app.use(
   "/api/role",
   [authenticateUser, authorizePermissions("admin")],
