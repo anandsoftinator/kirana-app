@@ -5,6 +5,7 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+const morgan = require("morgan");
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -20,6 +21,7 @@ const rateLimiter = require("express-rate-limit");
 const cors = require("cors");
 const port = process.env.PORT || 5000;
 app.use(cors());
+app.use(morgan());
 
 const authRouter = require("./routes/authRoutes");
 const userRoleRouter = require("./routes/userRoleRouter");
