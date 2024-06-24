@@ -69,6 +69,9 @@ io.on("connection", onConnection(io));
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
-server.listen(port, () => {
+//share to public ip address
+const host = "0.0.0.0";
+
+server.listen(port, host, () => {
   console.log(`Server is listening on port ${port}...`);
 });
