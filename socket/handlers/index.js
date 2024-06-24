@@ -1,6 +1,6 @@
-const messageHandler = require("./messageHandler.js/index.js");
-const conversationHandler = require("./conversationHandler.js");
-const registerHandler = require("./registerHandler.js");
+const conversationHandler = require("./conversationHandler");
+const messageHandler = require("./messageHandler");
+const registerHandler = require("./registerHandler");
 
 module.exports = {
   registerHandler,

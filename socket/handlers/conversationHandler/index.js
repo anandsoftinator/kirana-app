@@ -1,15 +1,16 @@
 const { getSupabaseClient } = require("../../../db/connect");
 const { v4: uuidv4 } = require("uuid");
+const { getSocketIds } = require("../../../utils");
 const supabase = getSupabaseClient();
 
-module.exports = (io, socket, userSockets) => {
-  const getUsername = async (number) => {
-    return await userSockets.get(number);
-  };
-
-  const createConversation = async ({ shopUUID, userUUID, reciever }) => {
+module.exports = (io, socket) => {
+  const createConversation = async ({
+    shopUUID,
+    userUUID,
+    reciever,
+    active,
+  }) => {
     try {
-      console.log("here");
       const { data, error } = await supabase
         .from("conversation")
         .insert([
@@ -17,6 +18,7 @@ module.exports = (io, socket, userSockets) => {
             uuid: uuidv4(),
             shopUUID: shopUUID,
             userUUID: userUUID,
+            active: active ? true : false,
           },
         ])
         .select();
@@ -24,9 +26,9 @@ module.exports = (io, socket, userSockets) => {
       if (error) {
         throw new Error(error.message);
       }
-      const receiverIds = await getUsername(reciever);
+      const recieverId = reciever === "user" ? userUUID : shopUUID;
+      const receiverIds = await getSocketIds(recieverId);
       if (receiverIds) {
-        console.log("here inside");
         receiverIds.forEach((receiverId) => {
           io.to(receiverId).emit("get-conversation-id", { data });
         });

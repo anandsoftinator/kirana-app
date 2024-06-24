@@ -4,14 +4,12 @@ const {
   conversationHandler,
 } = require("./handlers");
 
-const userSockets = new Map();
-
 const onConnection = (io) => {
   return function (socket) {
     console.log(`A user connected with id ${socket.id}`);
-    registerHandler(io, socket, userSockets);
-    messageHandler(io, socket, userSockets);
-    conversationHandler(io, socket, userSockets);
+    registerHandler(io, socket);
+    conversationHandler(io, socket);
+    messageHandler(io, socket);
   };
 };
 
