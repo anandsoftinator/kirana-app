@@ -30,7 +30,7 @@ module.exports = (io, socket) => {
       const receiverIds = await getSocketIds(recieverId);
       if (receiverIds) {
         receiverIds.forEach((receiverId) => {
-          io.to(receiverId).emit("get-conversation-id", { data });
+          socket.to(receiverId).emit("get-conversation-id", { data });
         });
       }
       socket.emit("get-conversation-id", { data });
