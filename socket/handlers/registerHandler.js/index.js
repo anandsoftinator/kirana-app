@@ -14,12 +14,12 @@ module.exports = (io, socket, userSockets) => {
     }
   };
 
-  const activateUser = async ({ username }) => {
+  const activateUser = async ({ number }) => {
     try {
-      if (!userSockets.has(username)) {
-        userSockets.set(username, []);
+      if (!userSockets.has(number)) {
+        userSockets.set(number, []);
       }
-      userSockets.get(username).push(socket.id);
+      userSockets.get(number).push(socket.id);
       console.log("userSockets", userSockets.keys(), userSockets.values());
       const users = getAllUsers();
 

@@ -3,17 +3,18 @@ const { v4: uuidv4 } = require("uuid");
 const supabase = getSupabaseClient();
 
 module.exports = (io, socket, userSockets) => {
-  const getUsername = async (username) => {
-    return await userSockets.get(username);
+  const getUsername = async (number) => {
+    return await userSockets.get(number);
   };
 
-  const createConversation = async ({ shopUUID, userUUID, sender }) => {
+  const createConversation = async ({ shopUUID, userUUID, reciever }) => {
     try {
+      console.log("here");
       const { data, error } = await supabase
         .from("conversation")
         .insert([
           {
-            uuid: uuidv4,
+            uuid: uuidv4(),
             shopUUID: shopUUID,
             userUUID: userUUID,
           },
@@ -23,13 +24,14 @@ module.exports = (io, socket, userSockets) => {
       if (error) {
         throw new Error(error.message);
       }
-      const reciever = sender === "user" ? shopUUID : userUUID;
       const receiverIds = await getUsername(reciever);
-
-      receiverIds.forEach((receiverId) => {
-        io.to(receiverId).emit("", message);
-      });
-      socket.emit("");
+      if (receiverIds) {
+        console.log("here inside");
+        receiverIds.forEach((receiverId) => {
+          io.to(receiverId).emit("get-conversation-id", { data });
+        });
+      }
+      socket.emit("get-conversation-id", { data });
     } catch (error) {
       console.error("Error: create-conversation", error.message);
     }
