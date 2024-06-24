@@ -8,23 +8,19 @@ const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type"],
     credentials: true,
   },
 });
 
 const path = require("path");
-// const morgan = require('morgan');
 const cookieParser = require("cookie-parser");
 const rateLimiter = require("express-rate-limit");
-const helmet = require("helmet");
 const cors = require("cors");
-const mongoSanitize = require("express-mongo-sanitize");
 const port = process.env.PORT || 5000;
+app.use(cors());
 
-// database
-const connectDB = require("./db/connect");
 const authRouter = require("./routes/authRoutes");
 const userRoleRouter = require("./routes/userRoleRouter");
 const userRouter = require("./routes/userRoutes");
@@ -39,16 +35,12 @@ const {
 } = require("./middleware/authentication");
 const onConnection = require("./socket");
 
-app.set("trust proxy", 1);
 app.use(
   rateLimiter({
     windowMs: 15 * 60 * 1000,
     max: 60,
   })
 );
-app.use(helmet());
-app.use(cors());
-app.use(mongoSanitize());
 
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));

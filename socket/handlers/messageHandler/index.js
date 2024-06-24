@@ -34,11 +34,9 @@ module.exports = (io, socket) => {
         throw new Error(error.message);
       }
       const receiverIds = await getSocketIds(receiverUUID);
-      console.log("invoked....");
       if (receiverIds) {
         receiverIds.forEach((receiverId) => {
-          console.log("inside...");
-          io.to(receiverId.toString()).emit("get-message", { data });
+          socket.to(receiverId.toString()).emit("get-message", { data });
         });
       }
       socket.emit("get-message", { data });
