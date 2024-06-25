@@ -4,36 +4,49 @@ const { getSocketIds } = require("../../../utils");
 const supabase = getSupabaseClient();
 
 module.exports = (io, socket) => {
-  const createConversation = async ({
-    shopUUID,
-    userUUID,
-    reciever,
-    active,
-  }) => {
+  const createConversation = async ({ shopUUID, userUUID, active }) => {
     try {
-      const { data, error } = await supabase
+      const { data: existingData, error: existingDataError } = await supabase
         .from("conversation")
-        .insert([
-          {
+        .select()
+        .eq("shopUUID", shopUUID)
+        .eq("userUUID", userUUID);
+
+      if (existingDataError) {
+        throw new Error(existingDataError.message);
+      }
+
+      let conversationData;
+
+      if (existingData && existingData.length > 0) {
+        conversationData = existingData[0];
+      } else {
+        const { data, error } = await supabase
+          .from("conversation")
+          .insert({
             uuid: uuidv4(),
             shopUUID: shopUUID,
             userUUID: userUUID,
             active: active ? true : false,
-          },
-        ])
-        .select();
+          })
+          .select();
 
-      if (error) {
-        throw new Error(error.message);
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        conversationData = data[0];
       }
-      const recieverId = reciever === "user" ? userUUID : shopUUID;
-      const receiverIds = await getSocketIds(recieverId);
+
+      const receiverIds = await getSocketIds(shopUUID);
       if (receiverIds) {
         receiverIds.forEach((receiverId) => {
-          socket.to(receiverId).emit("get-conversation-id", { data });
+          socket
+            .to(receiverId)
+            .emit("get-conversation-id", { data: conversationData });
         });
       }
-      socket.emit("get-conversation-id", { data });
+      socket.emit("get-conversation-id", { data: conversationData });
     } catch (error) {
       console.error("Error: create-conversation", error.message);
     }
@@ -86,7 +99,6 @@ module.exports = (io, socket) => {
         conversation.lastMessage = messageData[0] || null;
       }
 
-      console.log("conversationData", conversationData);
       socket.emit("all-conversations", { data: conversationData });
     } catch (error) {
       console.error("Error: get-all-conversations", error.message);

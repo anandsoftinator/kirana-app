@@ -24,7 +24,11 @@ const isPasswordValid = (password) => {
 };
 
 const isPasswordCorrect = async (password, hashPassword) => {
-  return await bcrypt.compare(password, hashPassword);
+  try {
+    return await bcrypt.compare(password, hashPassword);
+  } catch (error) {
+    throw new Error("Password comparison failed");
+  }
 };
 
 module.exports = { encryptPassword, isPasswordValid, isPasswordCorrect };

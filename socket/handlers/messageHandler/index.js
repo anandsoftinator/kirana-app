@@ -78,10 +78,10 @@ module.exports = (io, socket) => {
           socket.to(receiverId.toString()).emit("get-message", { data });
           socket
             .to(receiverId.toString())
-            .emit("get-conversation", { data: conversationData });
+            .emit("get-conversation", { data: conversationData[0] });
         });
       }
-      socket.emit("get-conversation", { data: conversationData });
+      socket.emit("get-conversation", { data: conversationData[0] });
       socket.emit("get-message", { data });
     } catch (error) {
       console.error("Error: send-message", error.message);

@@ -191,7 +191,7 @@ const login = async (req, res) => {
   const { data, error } = await supabase
     .from("user")
     .select(
-      "uuid, phone_number, name, address, status, last_online_at, password, role"
+      "uuid, phone_number, name, address, status, last_online_at, password, role, userImage"
     )
     .eq("phone_number", phone_number)
     .maybeSingle();
@@ -202,8 +202,13 @@ const login = async (req, res) => {
     );
   }
 
-  if (!isPasswordCorrect(password, data.password) || error) {
-    throw new UnauthenticatedError("Invalid Credentials");
+  if (!data) {
+    throw new CustomAPIError("Invalid credentials");
+  }
+
+  const passCheck = await isPasswordCorrect(password, data.password);
+  if (!passCheck) {
+    throw new UnauthenticatedError("Password is incorrect");
   }
 
   const token = createJWT({
@@ -213,7 +218,7 @@ const login = async (req, res) => {
     role: data.role,
   });
 
-  const { password: _, role, ...userInfo } = data;
+  const { password: _, ...userInfo } = data;
 
   res.status(StatusCodes.OK).json({
     message: "success",

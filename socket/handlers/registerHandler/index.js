@@ -4,12 +4,14 @@ const { removeUser, getAllUsers } = require("../../../utils/index");
 module.exports = (io, socket) => {
   const activateUser = async ({ uuid }) => {
     try {
+      console.log("userid", uuid);
       if (!userSockets.has(uuid)) {
         userSockets.set(uuid, []);
       }
       userSockets.get(uuid).push(socket.id);
       const users = getAllUsers();
       io.emit("active-users", { users });
+      socket.emit("active-confirm", { message: "success" });
     } catch (error) {
       console.error("Error: activate-user", error.message);
     }
