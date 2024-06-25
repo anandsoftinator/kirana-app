@@ -1,8 +1,14 @@
 const { StatusCodes } = require("http-status-codes");
 const { CustomAPIError } = require("../errors");
-const { storeImage } = require("../utils");
+const {
+  storeImage,
+  createJWT,
+  encryptPassword,
+  isPasswordValid,
+} = require("../utils");
 const { getSupabaseClient } = require("../db/connect");
 const { v4: uuidv4 } = require("uuid");
+const validator = require("validator");
 
 const supabase = getSupabaseClient();
 
@@ -96,44 +102,6 @@ const handleDeleteShopByID = async (req, res) => {
   res.status(StatusCodes.OK).json({ message: "Success", data: data });
 };
 
-const handleCreateNewShop = async (req, res) => {
-  const { shop_name, phone_number, address, category, latitude, longitude } =
-    req.body;
-  const imageFile = req.file;
-
-  let newAddress = async () => {
-    if (latitude && longitude) {
-      return await reverseGeocodeCoordinates(latitude, longitude);
-    }
-    if (address) {
-      return address.trim();
-    }
-    return null;
-  };
-  const imageUrl = await storeImage(imageFile, "Logo");
-
-  let shopData = {
-    uuid: uuidv4(),
-    shop_name: shop_name,
-    phone_number: phone_number,
-    address: await newAddress(),
-    latitude: latitude.toString(),
-    longitude: longitude.toString(),
-    category,
-    logo: imageUrl,
-    status: "active",
-    last_online_at: new Date().toISOString(),
-  };
-
-  const { data, error } = await supabase.from("shop").insert([shopData]);
-
-  if (error) {
-    throw new CustomAPIError(`An error occured: ${error.message}`);
-  }
-
-  res.status(StatusCodes.OK).json({ message: "Success", data: data });
-};
-
 const handleFindShowByPhone = async (req, res) => {
   const { phone_number } = req.body;
   const { data, error } = await supabase
@@ -158,6 +126,5 @@ module.exports = {
   handleGetShopByID,
   handleUpdateShopByID,
   handleDeleteShopByID,
-  handleCreateNewShop,
   handleFindShowByPhone,
 };

@@ -12,7 +12,6 @@ const {
   handleGetShopByID,
   handleUpdateShopByID,
   handleDeleteShopByID,
-  handleCreateNewShop,
   handleFindShowByPhone,
 } = require("../controllers/shopController");
 
@@ -21,15 +20,11 @@ const {
   // authorizePermissions,
 } = require("../middleware/authentication");
 
-router.route(
-  "/upload-order-image").post([authenticateUser, upload.single("image")],
-  handleUploadOrderImage
-);
-
 router
-  .route("/")
-  .get(authenticateUser,handleGetAllShops)
-  .post([authenticateUser, upload.single("image")], handleCreateNewShop);
+  .route("/upload-order-image")
+  .post([authenticateUser, upload.single("image")], handleUploadOrderImage);
+
+router.route("/").get(authenticateUser, handleGetAllShops);
 
 router
   .route("/categories")
@@ -41,7 +36,5 @@ router
   .get(authenticateUser, handleGetShopByID)
   .patch(authenticateUser, handleUpdateShopByID)
   .delete(authenticateUser, handleDeleteShopByID);
-
-
 
 module.exports = router;
