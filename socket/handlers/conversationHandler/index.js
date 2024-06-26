@@ -80,6 +80,8 @@ module.exports = (io, socket) => {
         throw new Error(conversationError.message);
       }
 
+      const updatedConversations = [];
+
       for (const conversation of conversationData) {
         const { userUUID } = conversation;
 
@@ -96,10 +98,13 @@ module.exports = (io, socket) => {
           throw new Error(messageError.message);
         }
 
-        conversation.lastMessage = messageData[0] || null;
+        if (messageData[0]) {
+          conversation.lastMessage = messageData[0];
+          updatedConversations.push(conversation);
+        }
       }
 
-      socket.emit("all-conversations", { data: conversationData });
+      socket.emit("all-conversations", { data: updatedConversations });
     } catch (error) {
       console.error("Error: get-all-conversations", error.message);
     }

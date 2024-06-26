@@ -1,14 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const { CustomAPIError } = require("../errors");
-const {
-  storeImage,
-  createJWT,
-  encryptPassword,
-  isPasswordValid,
-} = require("../utils");
+const { storeImage } = require("../utils");
 const { getSupabaseClient } = require("../db/connect");
-const { v4: uuidv4 } = require("uuid");
-const validator = require("validator");
 
 const supabase = getSupabaseClient();
 
@@ -22,7 +15,16 @@ const handleUploadOrderImage = async (req, res) => {
 };
 
 const handleGetCategories = async (req, res) => {
-  let { data, error } = await supabase.from("categories").select("*");
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const start = (page - 1) * limit;
+  const end = start + limit - 1;
+
+  let { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .range(start, end);
+
   if (error) {
     throw new CustomAPIError(`Error occured : ${error.message}`);
   }
@@ -57,7 +59,16 @@ const handleAddCategory = async (req, res) => {
 };
 
 const handleGetAllShops = async (req, res) => {
-  const { data, error } = await supabase.from("shop").select("*");
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const start = (page - 1) * limit;
+  const end = start + limit - 1;
+
+  const { data, error } = await supabase
+    .from("shop")
+    .select("*")
+    .range(start, end);
+
   if (error) {
     throw new CustomAPIError(`An error occured: ${error.message}`);
   }

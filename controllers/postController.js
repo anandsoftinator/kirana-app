@@ -7,7 +7,16 @@ const { v4: uuidv4 } = require("uuid");
 const supabase = getSupabaseClient();
 
 const handleGetAllPosts = async (req, res) => {
-  const { data, error } = await supabase.from("posts").select("*");
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const start = (page - 1) * limit;
+  const end = start + limit - 1;
+
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .range(start, end);
+
   if (error) {
     throw new CustomAPIError(`An error occured: ${error.message}`);
   }

@@ -1,5 +1,4 @@
 const { getSupabaseClient } = require("../db/connect");
-const validator = require("validator");
 const { StatusCodes } = require("http-status-codes");
 const { CustomAPIError } = require("../errors");
 const { storeImage } = require("../utils/fileUpload");
@@ -8,7 +7,15 @@ const { storeImage } = require("../utils/fileUpload");
 const supabase = getSupabaseClient();
 
 const handleGetAllUsers = async (req, res) => {
-  const { data, error } = await supabase.from("user").select("*");
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const start = (page - 1) * limit;
+  const end = start + limit - 1;
+
+  const { data, error } = await supabase
+    .from("user")
+    .select("*", { count: "exact" })
+    .range(start, end);
 
   if (error) {
     throw new CustomAPIError(`Error occured : ${error.message}`);

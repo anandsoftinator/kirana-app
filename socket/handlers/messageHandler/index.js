@@ -70,7 +70,7 @@ module.exports = (io, socket) => {
       if (messageError) {
         throw new Error(messageError.message);
       }
-      conversationData[0].lastMessage = messageData;
+      conversationData[0].lastMessage = messageData[0];
 
       const receiverIds = await getSocketIds(receiverUUID);
       if (receiverIds) {
