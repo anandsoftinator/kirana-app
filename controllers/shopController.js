@@ -19,16 +19,28 @@ const handleGetCategories = async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const start = (page - 1) * limit;
   const end = start + limit - 1;
+  const search = req.query.search || "";
 
-  let { data, error } = await supabase
+  const fields = ["category"];
+
+  let query = supabase
     .from("categories")
-    .select("*")
+    .select("*", { count: "exact" })
     .range(start, end);
+
+  if (search) {
+    const conditions = fields
+      .map((field) => `${field}.ilike.%${search}%`)
+      .join(",");
+    query = query.or(conditions);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new CustomAPIError(`Error occured : ${error.message}`);
   }
-  res.status(StatusCodes.OK).json({ message: "success", data });
+  res.status(StatusCodes.OK).json({ message: "success", data: data });
 };
 
 const handleAddCategory = async (req, res) => {
@@ -63,16 +75,28 @@ const handleGetAllShops = async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const start = (page - 1) * limit;
   const end = start + limit - 1;
+  const search = req.query.search || "";
 
-  const { data, error } = await supabase
+  const fields = ["shop_name", "phone_number", "status", "address", "category"];
+
+  let query = supabase
     .from("shop")
-    .select("*")
+    .select("*", { count: "exact" })
     .range(start, end);
 
-  if (error) {
-    throw new CustomAPIError(`An error occured: ${error.message}`);
+  if (search) {
+    const conditions = fields
+      .map((field) => `${field}.ilike.%${search}%`)
+      .join(",");
+    query = query.or(conditions);
   }
-  res.status(StatusCodes.OK).json({ message: "Success", data: data });
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new CustomAPIError(`Error occured : ${error.message}`);
+  }
+  res.status(StatusCodes.OK).json({ message: "success", data: data });
 };
 
 const handleGetShopByID = async (req, res) => {

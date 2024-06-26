@@ -11,16 +11,27 @@ const handleGetAllUsers = async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const start = (page - 1) * limit;
   const end = start + limit - 1;
+  const search = req.query.search || "";
 
-  const { data, error } = await supabase
+  const fields = ["name", "phone_number", "role", "status", "address"];
+
+  let query = supabase
     .from("user")
     .select("*", { count: "exact" })
     .range(start, end);
 
+  if (search) {
+    const conditions = fields
+      .map((field) => `${field}.ilike.%${search}%`)
+      .join(",");
+    query = query.or(conditions);
+  }
+
+  const { data, error } = await query;
+
   if (error) {
     throw new CustomAPIError(`Error occured : ${error.message}`);
   }
-
   res.status(StatusCodes.OK).json({ message: "success", data: data });
 };
 
