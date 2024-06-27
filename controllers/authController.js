@@ -147,8 +147,6 @@ const registerShop = async (req, res) => {
     imageUrl = await storeImage(imageFile, "Logo");
   }
 
-  console.log("imageurl", imageUrl, imageFile);
-
   let shopData = {
     uuid: uuidv4(),
     shop_name: shop_name,

@@ -12,15 +12,6 @@ module.exports = (io, socket) => {
     type,
     imageUrl = null,
   }) => {
-    console.log(
-      "sendmessage",
-      convId,
-      message,
-      senderUUID,
-      receiverUUID,
-      type,
-      imageUrl
-    );
     try {
       let msgData = null;
       const { data, error } = await supabase
@@ -48,7 +39,6 @@ module.exports = (io, socket) => {
 
       if (type === "order") {
         const orderObject = JSON.parse(message);
-        console.log("data after", orderObject);
         const { data: orderData, error: orderError } = await supabase
           .from("orders")
           .insert(
@@ -66,7 +56,6 @@ module.exports = (io, socket) => {
           .select("*");
 
         if (orderError) {
-          console.log("order", orderError.message);
           throw new Error(orderError.message);
         }
         msgData = { ...msgData, orderData: orderData };

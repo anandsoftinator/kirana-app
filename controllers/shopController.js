@@ -47,6 +47,10 @@ const handleGetCategories = async (req, res) => {
 const handleAddCategory = async (req, res) => {
   const { category } = req.body;
 
+  if (!category) {
+    throw new CustomAPIError(`Category should be specified`);
+  }
+
   let { data: existingCategories, error: selectError } = await supabase
     .from("categories")
     .select("category")
@@ -68,7 +72,7 @@ const handleAddCategory = async (req, res) => {
     throw new CustomAPIError(`Error occured : ${insertError.message}`);
   }
 
-  res.status(StatusCodes.OK).json({ messafe: "success", data: newCategory });
+  res.status(StatusCodes.OK).json({ message: "success", data: newCategory });
 };
 
 const handleGetAllShops = async (req, res) => {
