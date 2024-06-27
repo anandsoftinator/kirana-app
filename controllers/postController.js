@@ -8,19 +8,32 @@ const supabase = getSupabaseClient();
 
 const handleGetAllPosts = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const start = (page - 1) * limit;
-  const end = start + limit - 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : null;
+  const start = limit ? (page - 1) * limit : null;
+  const end = limit ? start + limit - 1 : null;
+  const search = req.query.search || "";
 
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .range(start, end);
+  const fields = ["name", "phone_number", "role", "status", "address"];
+
+  let query = supabase.from("posts").select("*", { count: "exact" });
+
+  if (start !== null && end !== null) {
+    query = query.range(start, end);
+  }
+
+  if (search) {
+    const conditions = fields
+      .map((field) => `${field}.ilike.%${search}%`)
+      .join(",");
+    query = query.or(conditions);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
-    throw new CustomAPIError(`An error occured: ${error.message}`);
+    throw new CustomAPIError(`Error occured : ${error.message}`);
   }
-  res.status(StatusCodes.OK).json({ message: "Success", data: data });
+  res.status(StatusCodes.OK).json({ message: "success", data: data });
 };
 
 const handleGetPostByID = async (req, res) => {

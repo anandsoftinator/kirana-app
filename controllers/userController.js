@@ -8,17 +8,18 @@ const supabase = getSupabaseClient();
 
 const handleGetAllUsers = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const start = (page - 1) * limit;
-  const end = start + limit - 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : null;
+  const start = limit ? (page - 1) * limit : null;
+  const end = limit ? start + limit - 1 : null;
   const search = req.query.search || "";
 
   const fields = ["name", "phone_number", "role", "status", "address"];
 
-  let query = supabase
-    .from("user")
-    .select("*", { count: "exact" })
-    .range(start, end);
+  let query = supabase.from("user").select("*", { count: "exact" });
+
+  if (start !== null && end !== null) {
+    query = query.range(start, end);
+  }
 
   if (search) {
     const conditions = fields

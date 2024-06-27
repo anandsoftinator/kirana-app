@@ -11,6 +11,7 @@ const {
 const validator = require("validator");
 const { getSupabaseClient } = require("../db/connect");
 const { blacklistToken } = require("../utils/jwt");
+const { reverseGeocodeCoordinates } = require("../utils/externalCall");
 
 const supabase = getSupabaseClient();
 
@@ -145,6 +146,8 @@ const registerShop = async (req, res) => {
   if (imageFile) {
     imageUrl = await storeImage(imageFile, "Logo");
   }
+
+  console.log("imageurl", imageUrl, imageFile);
 
   let shopData = {
     uuid: uuidv4(),

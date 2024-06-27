@@ -16,17 +16,18 @@ const handleUploadOrderImage = async (req, res) => {
 
 const handleGetCategories = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const start = (page - 1) * limit;
-  const end = start + limit - 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : null;
+  const start = limit ? (page - 1) * limit : null;
+  const end = limit ? start + limit - 1 : null;
   const search = req.query.search || "";
 
   const fields = ["category"];
 
-  let query = supabase
-    .from("categories")
-    .select("*", { count: "exact" })
-    .range(start, end);
+  let query = supabase.from("categories").select("*", { count: "exact" });
+
+  if (start !== null && end !== null) {
+    query = query.range(start, end);
+  }
 
   if (search) {
     const conditions = fields
@@ -72,17 +73,18 @@ const handleAddCategory = async (req, res) => {
 
 const handleGetAllShops = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const start = (page - 1) * limit;
-  const end = start + limit - 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : null;
+  const start = limit ? (page - 1) * limit : null;
+  const end = limit ? start + limit - 1 : null;
   const search = req.query.search || "";
 
   const fields = ["shop_name", "phone_number", "status", "address", "category"];
 
-  let query = supabase
-    .from("shop")
-    .select("*", { count: "exact" })
-    .range(start, end);
+  let query = supabase.from("shop").select("*", { count: "exact" });
+
+  if (start !== null && end !== null) {
+    query = query.range(start, end);
+  }
 
   if (search) {
     const conditions = fields

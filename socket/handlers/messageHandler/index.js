@@ -12,6 +12,15 @@ module.exports = (io, socket) => {
     type,
     imageUrl = null,
   }) => {
+    console.log(
+      "sendmessage",
+      convId,
+      message,
+      senderUUID,
+      receiverUUID,
+      type,
+      imageUrl
+    );
     try {
       let msgData = null;
       const { data, error } = await supabase
@@ -38,22 +47,23 @@ module.exports = (io, socket) => {
       msgData = data;
 
       if (type === "order") {
-        const { order, type } = JSON.parse(message);
-        console.log("data", order, type);
+        const orderObject = JSON.parse(message);
+        console.log("data after", orderObject);
         const { data: orderData, error: orderError } = await supabase
           .from("orders")
-          .insert([
-            {
-              uuid: uuidv4(),
-              name: order,
-              type: type,
-              status: false,
-              msg_id: msgData.id,
-              image: type === "image" ? order : "",
-            },
-          ])
-          .select("*")
-          .single();
+          .insert(
+            orderObject.map((val) => {
+              return {
+                uuid: uuidv4(),
+                name: val.order,
+                type: val.type,
+                status: "Pending",
+                msg_id: msgData.id,
+                image: val.type === "image" ? val.order : "",
+              };
+            })
+          )
+          .select("*");
 
         if (orderError) {
           console.log("order", orderError.message);
@@ -134,37 +144,7 @@ module.exports = (io, socket) => {
         throw new Error(error.message);
       }
 
-      console.log("data here is", data);
-
-      const messages = data.map((message) => {
-        const orderData =
-          message.orders.length > 0
-            ? {
-                id: message.orders[0].id,
-                created_at: message.orders[0].created_at,
-                uuid: message.orders[0].uuid,
-                name: message.orders[0].name,
-                type: message.orders[0].type,
-                status: message.orders[0].status,
-                msg_id: message.orders[0].msg_id,
-                image: message.orders[0].image,
-              }
-            : null;
-
-        return {
-          id: message.id,
-          created_at: message.created_at,
-          conv_uuid: message.conv_uuid,
-          senderUUID: message.senderUUID,
-          receiverUUID: message.receiverUUID,
-          text: message.text,
-          type: message.type,
-          image: message.image,
-          status: message.status,
-          orderData,
-        };
-      });
-      socket.emit("all-messages", { data: messages });
+      socket.emit("all-messages", { data });
     } catch (error) {
       console.error("Error: send-message", error.message);
     }
