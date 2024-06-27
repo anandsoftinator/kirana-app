@@ -2,6 +2,7 @@ const {
   registerHandler,
   messageHandler,
   conversationHandler,
+  orderHandler,
 } = require("./handlers");
 
 const onConnection = (io) => {
@@ -10,6 +11,7 @@ const onConnection = (io) => {
     registerHandler(io, socket);
     conversationHandler(io, socket);
     messageHandler(io, socket);
+    orderHandler(io, socket);
   };
 };
 

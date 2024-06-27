@@ -8,7 +8,9 @@ module.exports = (io, socket) => {
       if (!userSockets.has(uuid)) {
         userSockets.set(uuid, []);
       }
-      userSockets.get(uuid).push(socket.id);
+      const ids = userSockets.get(uuid);
+      userSockets.set(uuid, [...new Set([...ids, socket.id])]);
+
       const users = getAllUsers();
       io.emit("active-users", { users });
       socket.emit("active-confirm", { message: "success" });
