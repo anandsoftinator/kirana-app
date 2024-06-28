@@ -13,7 +13,7 @@ const handleGetAllPosts = async (req, res) => {
   const end = limit ? start + limit - 1 : null;
   const search = req.query.search || "";
 
-  const fields = ["name", "phone_number", "role", "status", "address"];
+  const fields = ["description"];
 
   let query = supabase.from("posts").select("*", { count: "exact" });
 
