@@ -122,10 +122,36 @@ const handleGetShopByID = async (req, res) => {
 
 const handleUpdateShopByID = async (req, res) => {
   const { id } = req.params;
-  console.log("req body", req.body);
+  const { phone_number } = req.body;
+  const imageFile = req.file;
+
+  if (
+    phone_number &&
+    !validator.isMobilePhone(phone_number, "any", { strictMode: false })
+  ) {
+    throw new CustomAPIError("Invalid phone number");
+  }
+
+  if (
+    phone_number &&
+    (phone_number.length !== 10 || !/^\d{10}$/.test(phone_number))
+  ) {
+    throw new CustomAPIError("Phone number must be 10 digits long.");
+  }
+
+  let imageUrl = null;
+  if (imageFile) {
+    imageUrl = await storeImage(imageFile, "Logo");
+  }
+  console.log("check here", req.body, imageUrl, imageFile);
+  let shopData = {
+    logo: imageUrl,
+    ...req.body,
+  };
+
   const { data, error } = await supabase
     .from("shop")
-    .update(req.body)
+    .update(shopData)
     .eq("uuid", id);
 
   if (error) {

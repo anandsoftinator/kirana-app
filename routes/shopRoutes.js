@@ -34,7 +34,7 @@ router
 router
   .route("/:id")
   .get(authenticateUser, handleGetShopByID)
-  .patch(authenticateUser, handleUpdateShopByID)
+  .patch([authenticateUser, upload.single("image")], handleUpdateShopByID) //it should be formdata
   .delete(authenticateUser, handleDeleteShopByID);
 
 module.exports = router;
