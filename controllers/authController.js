@@ -95,6 +95,7 @@ const registerShop = async (req, res) => {
     latitude,
     longitude,
     password,
+    licence,
   } = req.body;
   const imageFile = req.file;
 
@@ -106,9 +107,7 @@ const registerShop = async (req, res) => {
   }
 
   if (phone_number.length !== 10 || !/^\d{10}$/.test(phone_number)) {
-    return res
-      .status(400)
-      .json({ error: "Phone number must be 10 digits long." });
+    throw new CustomAPIError("Phone number must be 10 digits long.");
   }
 
   if (!password || !isPasswordValid(password)) {
@@ -154,6 +153,7 @@ const registerShop = async (req, res) => {
     address: await newAddress(),
     latitude: parseFloat(latitude.toString()).toFixed(4),
     longitude: parseFloat(longitude.toString()).toFixed(4),
+    licence,
     category,
     logo: imageUrl,
     status: "active",

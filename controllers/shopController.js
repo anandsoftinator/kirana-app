@@ -122,6 +122,7 @@ const handleGetShopByID = async (req, res) => {
 
 const handleUpdateShopByID = async (req, res) => {
   const { id } = req.params;
+  console.log("req body", req.body);
   const { data, error } = await supabase
     .from("shop")
     .update(req.body)

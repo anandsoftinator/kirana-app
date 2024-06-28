@@ -3,7 +3,7 @@ const { getSocketIds } = require("../../../utils");
 const supabase = getSupabaseClient();
 
 module.exports = (io, socket) => {
-  const changeOrderStatus = async ({ orderUUID, shopUUID, status }) => {
+  const changeOrderStatus = async ({ orderUUID, userUUID, status }) => {
     try {
       const { data: updateData, error: updateError } = await supabase
         .from("orders")
@@ -15,7 +15,7 @@ module.exports = (io, socket) => {
         throw new Error(updateError.message);
       }
 
-      const receiverIds = await getSocketIds(shopUUID);
+      const receiverIds = await getSocketIds(userUUID);
       if (receiverIds) {
         receiverIds.forEach((receiverId) => {
           socket
