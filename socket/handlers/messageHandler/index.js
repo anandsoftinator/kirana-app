@@ -58,7 +58,7 @@ module.exports = (io, socket) => {
         if (orderError) {
           throw new Error(orderError.message);
         }
-        msgData = { ...msgData, orderData: orderData };
+        msgData = { ...msgData, orders: orderData };
       }
 
       const { data: conversationData, error: conversationError } =
