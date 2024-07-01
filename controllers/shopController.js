@@ -122,7 +122,7 @@ const handleGetShopByID = async (req, res) => {
 
 const handleUpdateShopByID = async (req, res) => {
   const { id } = req.params;
-  const { phone_number } = req.body;
+  const { phone_number, image, ...otherFields } = req.body;
   const imageFile = req.file;
 
   if (
@@ -139,14 +139,16 @@ const handleUpdateShopByID = async (req, res) => {
     throw new CustomAPIError("Phone number must be 10 digits long.");
   }
 
-  let imageUrl = null;
+  let shopData = {};
+
   if (imageFile) {
-    imageUrl = await storeImage(imageFile, "Logo");
+    let imageUrl = await storeImage(imageFile, "Logo");
+    shopData.logo = imageUrl;
   }
-  console.log("check here", req.body, imageUrl, imageFile);
-  let shopData = {
-    logo: imageUrl,
-    ...req.body,
+
+  shopData = {
+    ...shopData,
+    ...otherFields,
   };
 
   const { data, error } = await supabase

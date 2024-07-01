@@ -13,7 +13,8 @@ const {
   handleCreateNewPost,
   handleGetAllPosts,
   handleGetPostByID,
-  handleUpdateLikes,
+  handleGetPostByIDDummy,
+  handleAddLike,
 } = require("../controllers/postController");
 
 const {
@@ -29,6 +30,8 @@ router
 router
   .route("/:id")
   .get(authenticateUser, handleGetPostByID)
-  .patch(authenticateUser, handleUpdateLikes);
+  .patch(authenticateUser, handleAddLike);
+
+router.route("/dummy/:id").get(authenticateUser, handleGetPostByIDDummy);
 
 module.exports = router;

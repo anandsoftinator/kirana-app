@@ -38,12 +38,12 @@ const {
 } = require("./middleware/authentication");
 const onConnection = require("./socket");
 
-app.use(
-  rateLimiter({
-    windowMs: 15 * 60 * 1000,
-    max: 60,
-  })
-);
+// app.use(
+//   rateLimiter({
+//     windowMs: 15 * 60 * 1000,
+//     max: 60,
+//   })
+// );
 
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));

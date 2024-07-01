@@ -38,45 +38,67 @@ const handleGetAllPosts = async (req, res) => {
 
 const handleGetPostByID = async (req, res) => {
   const { id } = req.params;
+  const { uuid } = req.user;
   const page = parseInt(req.query.page) || 1;
-  const limit = req.query.limit ? parseInt(req.query.limit) : null;
-  const start = limit ? (page - 1) * limit : null;
-  const end = limit ? start + limit - 1 : null;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+  const offset = (page - 1) * limit;
 
-  const { data, error } = await supabase
-    .from("posts")
-    .select(
-      `
-      *,
-      shop:shop_uuid (
-        logo,
-        shop_name
-      )
-    `
-    )
-    .eq("shop_uuid", id)
-    .range(start, end);
+  if (!uuid) {
+    throw new CustomAPIError("uuid not provided");
+  }
+  const { data, error } = await supabase.rpc(
+    "get_posts_with_likes_and_user_liked",
+    {
+      in_shop_uuid: id,
+      in_user_uuid: uuid,
+      limit_param: limit,
+      offset_param: offset,
+    }
+  );
 
   if (error) {
-    throw new CustomAPIError(`An error occured: ${error.message}`);
+    throw new CustomAPIError(`An error occurred: ${error.message}`);
   }
 
-  res.status(StatusCodes.OK).json({ message: "Success", data: data });
+  res.status(StatusCodes.OK).json({ message: "Success", data });
 };
 
-const handleUpdateLikes = async (req, res) => {
+const handleGetPostByIDDummy = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { uuid } = req.user;
+  const page = parseInt(req.query.page) || 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+  const offset = (page - 1) * limit;
 
-  if (status == undefined || status == null) {
-    throw new CustomAPIError("status must be set!");
+  if (!uuid) {
+    throw new CustomAPIError("uuid not provided");
   }
+  const { data, error } = await supabase.rpc(
+    "get_posts_with_likes_and_user_liked",
+    {
+      in_shop_uuid: id,
+      in_user_uuid: uuid,
+      limit_param: limit,
+      offset_param: offset,
+    }
+  );
+
+  if (error) {
+    throw new CustomAPIError(`An error occurred: ${error.message}`);
+  }
+
+  res.status(StatusCodes.OK).json({ message: "Success", data });
+};
+
+const handleAddLike = async (req, res) => {
+  const { id } = req.params;
+  const { uuid } = req.user;
 
   const { data, error } = await supabase.from("likes").upsert(
     [
       {
         post_uuid: id,
-        Status: status,
+        user_uuid: uuid,
       },
     ],
     {
@@ -157,5 +179,6 @@ module.exports = {
   handleCreateNewPost,
   handleGetAllPosts,
   handleGetPostByID,
-  handleUpdateLikes,
+  handleAddLike,
+  handleGetPostByIDDummy,
 };
