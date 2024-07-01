@@ -38,11 +38,24 @@ const handleGetAllPosts = async (req, res) => {
 
 const handleGetPostByID = async (req, res) => {
   const { id } = req.params;
+  const page = parseInt(req.query.page) || 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : null;
+  const start = limit ? (page - 1) * limit : null;
+  const end = limit ? start + limit - 1 : null;
+
   const { data, error } = await supabase
     .from("posts")
-    .select("*")
-    .eq("uuid", id)
-    .single();
+    .select(
+      `
+      *,
+      shop:shop_uuid (
+        logo,
+        shop_name
+      )
+    `
+    )
+    .eq("shop_uuid", id)
+    .range(start, end);
 
   if (error) {
     throw new CustomAPIError(`An error occured: ${error.message}`);
@@ -78,11 +91,30 @@ const handleUpdateLikes = async (req, res) => {
 };
 
 const handleCreateNewPost = async (req, res) => {
-  const { desc } = req.body;
+  const { desc, shop_uuid } = req.body;
   const { image, video } = req.files;
 
-  if (!desc && !image && !video) {
+  if (!shop_uuid) {
+    throw new CustomAPIError(`Please provide post's uuid`);
+  }
+
+  const { data: shopData, error: shopError } = await supabase
+    .from("shop")
+    .select()
+    .eq("uuid", shop_uuid);
+
+  if (shopError || !shopData) {
+    throw new CustomAPIError(`Shop uuid is not valid`);
+  }
+
+  if (!desc && !video && !image) {
     throw new CustomAPIError(`All fields must be provided`);
+  }
+
+  if (video && image) {
+    throw new CustomAPIError(
+      `Only one of either a video or an image must be provided`
+    );
   }
 
   let imageUrl = null;
@@ -109,6 +141,7 @@ const handleCreateNewPost = async (req, res) => {
     description: desc,
     video: videoUrl,
     image: imageUrl,
+    shop_uuid,
   };
 
   const { data, error } = await supabase.from("posts").insert([postData]);
