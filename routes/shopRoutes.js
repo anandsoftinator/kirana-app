@@ -12,6 +12,7 @@ const {
   handleGetShopByID,
   handleUpdateShopByID,
   handleDeleteShopByID,
+  handleDeleteCategoryById,
   handleFindShowByPhone,
 } = require("../controllers/shopController");
 
@@ -30,6 +31,10 @@ router
   .route("/categories")
   .get(authenticateUser, handleGetCategories)
   .post(authenticateUser, handleAddCategory);
+
+router
+  .route("/categories/:id")
+  .delete(authenticateUser, handleDeleteCategoryById);
 
 router
   .route("/:id")

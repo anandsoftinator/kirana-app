@@ -44,6 +44,20 @@ const handleGetCategories = async (req, res) => {
   res.status(StatusCodes.OK).json({ message: "success", data: data });
 };
 
+const handleDeleteCategoryById = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from("categories")
+    .delete()
+    .select()
+    .eq("id", id);
+
+  if (error) {
+    throw new CustomAPIError(`Error occured : ${error.message}`);
+  }
+  res.status(StatusCodes.OK).json({ message: "success", data });
+};
+
 const handleAddCategory = async (req, res) => {
   const { category } = req.body;
 
@@ -197,4 +211,5 @@ module.exports = {
   handleUpdateShopByID,
   handleDeleteShopByID,
   handleFindShowByPhone,
+  handleDeleteCategoryById,
 };
